@@ -59,9 +59,31 @@ RUN mkdir -p autoconf-src                               \
     && make -j4                                         \
     && make install
 
-RUN mkdir -p pkgconf-src                                \
-    && tar -xf pkgconf*.tar.xz -C pkgconf-src/          \
-    && cd pkgconf-src/pkgconf*                          \
+RUN mkdir -p texinfo-src                                \
+    && tar -xf texinfo-*.tar.gz -C texinfo-src/         \
+    && cd texinfo-src/texinfo*                          \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p groff-src                                  \
+    && tar -xf groff-*.tar.gz -C groff-src/             \
+    && cd groff-src/groff*                              \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p make-src                                   \
+    && tar -xf make-*.tar.gz -C make-src/               \
+    && cd make-src/make*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+
+RUN mkdir -p ldap-src                                   \
+    && tar -xf openldap*.tgz -C ldap-src/               \
+    && cd ldap-src/open*                                \
     && ./configure                                      \
     && make -j4                                         \
     && make install
@@ -166,8 +188,7 @@ RUN mkdir -p sqlite-src                                 \
 RUN mkdir -p redis-src                                  \
     && tar -xzf redis*.tar.gz -C redis-src/             \
     && cd redis-src/redis*                              \
-    && ./configure                                      \
-    && make -j4                                         \
+    && make -j4 BUILD_TLS=yes                           \
     && make install
 
 FROM scratch AS stage4
