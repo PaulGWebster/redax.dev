@@ -4,8 +4,22 @@ COPY src /asset
 
 WORKDIR /asset
 
-# Singularize our shells to bash
+# Start with the major backers
+RUN mkdir -p bison-src                                  \
+    && tar -xzf bison*.tar.gz -C bison-src/             \
+    && cd bison-src/bison*                              \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
 
+RUN mkdir -p tcl-src                                    \
+    && tar -xzf tcl*.tar.gz -C tcl-src/                 \
+    && cd tcl-src/tcl*/unix                             \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Singularize our shells to bash
 RUN mkdir -p bash-src                                   \
     && tar -xzf bash*.tar.gz -C bash-src/               \
     && cd bash-src/bash*                                \
@@ -31,9 +45,17 @@ RUN mkdir -p autoconf-src                               \
     && make -j4                                         \
     && make install
 
-RUN mkdir -p automake-src                               \
-    && tar -xzf automake*.tar.gz -C automake-src/       \
-    && cd automake-src/automake*                        \
+RUN mkdir -p pkgconf-src                                \
+    && tar -xf pkgconf*.tar.xz -C pkgconf-src/          \
+    && cd pkgconf-src/pkgconf*                          \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Cmake
+RUN mkdir -p cmake-src                                  \
+    && tar -xzf cmake*.tar.gz -C cmake-src/             \
+    && cd cmake-src/cmake*                              \
     && ./configure                                      \
     && make -j4                                         \
     && make install
@@ -53,6 +75,7 @@ RUN mkdir -p zlib-src                                   \
     && ./configure                                      \
     && make -j4                                         \
     && make install
+
 
 # And then perl
 
@@ -89,19 +112,3 @@ RUN mkdir -p libwww-perl-src                            \
     && perl Makefile.PL                                 \
     && make                                             \
     && make install
-
-RUN rm -Rf                                              \
-    /var/cache/apt                                      \
-    /usr/bin/dpkg                                       \
-    /usr/lib/dpkg                                       \
-    /etc/dpkg                                           \
-    /usr/share/dpkg                                     \
-    /usr/share/man/man1/dpkg.1.gz                       \
-    /usr/local/share                                    \
-    /asset
-
-#RUN tar -xzvf bash*
-
-FROM scratch AS clean
-
-COPY --from=stage2 / /
