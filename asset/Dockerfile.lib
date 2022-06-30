@@ -70,7 +70,12 @@ RUN mkdir -p App-cpanminus                              \
 
 # We also now have a full ssl and gcc stack so lets get libwww-perl working
 
-RUN cpanm libwww-perl
+RUN mkdir -p libwww-perl-src                            \
+    && tar -xzf libwww-perl*.tar.gz -C libwww-perl-src  \
+    && cd libwww-perl-src/lib*                          \
+    && perl Makefile.PL                                 \
+    && make                                             \
+    && make install
 
 RUN rm -Rf                                              \
     /var/cache/apt                                      \
