@@ -26,8 +26,20 @@ There is an exported version of this image that has been run through gzip and sp
 
 ``` docker build . -f Dockerfile.gcc -t perlbase:stage2 ```
 
-## Stage 3 (Dockerfile.lib)
+## Stage 3 (Dockerfile.db)
 
-This one adds in a lot of required libraries for a host of perl libraries.
+This stage adds in client libraries for sqlite, mssql, postgresql and maria
 
 ``` docker build . -f Dockerfile.lib -t perlbase:stage3 ```
+
+## Stage 4 (Dockerfile.perl)
+
+This one adds in the requierd modules for the previous steps as well as all the major frameworks, including POE Mojolicious Async and Catalyst
+
+## Stage 5 (Dockerfile.misc)
+
+Various bits that may need adjustments, presently blank
+
+## Stage 6 (Dockerfile.clean)
+
+The final pass cleaning unrequired files from the system before the final image publication.

@@ -1,0 +1,8 @@
+FROM perlbase:stage2 AS stage3
+
+# Singularize our shells to bash
+
+
+FROM scratch AS clean
+
+COPY --from=stage2 / /

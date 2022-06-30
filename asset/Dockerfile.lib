@@ -38,8 +38,21 @@ RUN mkdir -p automake-src                               \
     && make -j4                                         \
     && make install
 
-
 # Here be liblzo and other friends
+
+RUN mkdir -p libidn-src                                 \
+    && tar -xzf libidn*.tar.gz -C libidn-src/           \
+    && cd libidn-src/libidn*                            \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p zlib-src                                   \
+    && tar -xzf zlib*.tar.gz -C zlib-src/               \
+    && cd zlib-src/zlib*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
 
 # And then perl
 
