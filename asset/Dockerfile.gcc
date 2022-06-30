@@ -1,0 +1,17 @@
+FROM paulgwebster/gcc:12.1.0 AS stage1
+
+RUN apt remove              \ 
+    perl                    \
+    python3                 \
+    debian-archive-keyring  \
+    apt                     \
+    x11-common              \
+    media-types             \
+    mariadb-common          \
+    autotools-dev           \
+    -y                      \
+    --allow-remove-essential
+
+FROM scratch AS clean
+
+COPY --from=stage1 / /

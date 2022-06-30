@@ -1,0 +1,89 @@
+FROM perlbase:stage1 AS stage2
+
+COPY src /asset
+
+WORKDIR /asset
+
+# Singularize our shells to bash
+
+RUN mkdir -p bash-src                                   \
+    && tar -xzf bash*.tar.gz -C bash-src/               \
+    && cd bash-src/bash*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Should really deploy a script to check what is in /etc/shells and go nuke them
+# that way
+
+RUN rm /bin/sh                                          \
+    && ln -s /bin/bash /bin/sh                          \
+    && rm /bin/dash                                     \
+    && echo "/bin/sh" > /etc/shells                     \
+    && echo "/bin/bash" >> /etc/shells
+
+# Reinstall autoconf and automake
+
+RUN mkdir -p autoconf-src                               \
+    && tar -xzf autoconf*.tar.gz -C autoconf-src/       \
+    && cd autoconf-src/autoconf*                        \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p automake-src                               \
+    && tar -xzf automake*.tar.gz -C automake-src/       \
+    && cd automake-src/automake*                        \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+
+# Here be liblzo and other friends
+
+# And then perl
+
+RUN mkdir -p perl-src                                   \
+    && tar -xzf perl*.tar.gz -C perl-src/               \
+    && cd perl-src/perl*                                \
+    && sh Configure -de                                 \
+    && make -j4                                         \
+    && make install
+
+# Next is OpenSSL as it requires perl to be built
+
+RUN mkdir -p openssl-src                                \
+    && tar -xzf openssl*.tar.gz -C openssl-src          \
+    && cd openssl-src/openssl*                          \
+    && ./config                                         \
+    && make -j4                                         \
+    && make install
+
+# And some important perl tools
+
+RUN mkdir -p App-cpanminus                              \
+    && tar -xzf App-cpanminus*.tar.gz -C App-cpanminus  \
+    && cd App-cpanminus/App-cpanminus*                  \
+    && perl Makefile.PL                                 \
+    && make                                             \
+    && make install
+
+# We also now have a full ssl and gcc stack so lets get libwww-perl working
+
+RUN cpanm libwww-perl
+
+RUN rm -Rf                                              \
+    /var/cache/apt                                      \
+    /usr/bin/dpkg                                       \
+    /usr/lib/dpkg                                       \
+    /etc/dpkg                                           \
+    /usr/share/dpkg                                     \
+    /usr/share/man/man1/dpkg.1.gz                       \
+    /usr/local/share                                    \
+    /asset
+
+#RUN tar -xzvf bash*
+
+FROM scratch AS clean
+
+COPY --from=stage2 / /
