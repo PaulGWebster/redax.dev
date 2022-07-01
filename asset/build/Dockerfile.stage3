@@ -1,0 +1,6 @@
+# This is a stub file due to stage2 being reran on its self to ensure ssl
+# lib linking, see stage3.sh for what is going on
+
+FROM perlbase:stage2 AS stage3
+
+RUN echo "You should never see this."

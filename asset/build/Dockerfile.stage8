@@ -1,0 +1,20 @@
+FROM perlbase:stage7 AS stage7
+
+RUN echo "Stage 7 linked"
+
+FROM scratch AS stage7-clean
+
+COPY --from=stage7 / /
+
+RUN rm -Rf                                              \
+    /var/cache/apt                                      \
+    /usr/bin/dpkg                                       \
+    /usr/lib/dpkg                                       \
+    /etc/dpkg                                           \
+    /usr/share/dpkg                                     \
+    /usr/share/man/man1/dpkg.1.gz                       \
+    /asset
+
+FROM scratch AS stage8
+
+COPY --from=stage7-clean / /

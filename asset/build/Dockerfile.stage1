@@ -1,0 +1,28 @@
+FROM perlbase:stage0 AS stage1
+
+COPY src /asset
+
+WORKDIR /asset
+
+RUN apt remove              \ 
+    perl                    \
+    python3                 \
+    debian-archive-keyring  \
+    apt                     \
+    x11-common              \
+    media-types             \
+    mariadb-common          \
+    autotools-dev           \
+    -y                      \
+    --allow-remove-essential
+
+RUN rm -Rf                                              \
+    /var/cache/apt                                      \
+    /usr/bin/dpkg                                       \
+    /usr/lib/dpkg                                       \
+    /etc/dpkg                                           \
+    /usr/share/dpkg                                     \
+    /usr/share/man/man1/dpkg.1.gz
+
+# Remove any folders we created in asset including the base folder
+RUN find /asset -type d -exec rm -rf \;

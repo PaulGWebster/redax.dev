@@ -1,0 +1,168 @@
+FROM perlbase:stage1 AS stage2
+
+RUN find /asset -type d -exec rm -rf \;
+
+# Start with the major backers
+RUN mkdir -p bison-src                                  \
+    && tar -xzf bison*.tar.gz -C bison-src/             \
+    && cd bison-src/bison*                              \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p tcl-src                                    \
+    && tar -xzf tcl*.tar.gz -C tcl-src/                 \
+    && cd tcl-src/tcl*/unix                             \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Singularize our shells to bash
+RUN mkdir -p bash-src                                   \
+    && tar -xzf bash*.tar.gz -C bash-src/               \
+    && cd bash-src/bash*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Should really deploy a script to check what is in /etc/shells and go nuke them
+# that way
+
+RUN unlink /bin/sh && ln -s /bin/bash /bin/sh
+RUN rm /bin/dash || echo "Dash not found"
+RUN echo "/bin/sh" > /etc/shells                        \
+    && echo "/bin/bash" >> /etc/shells
+
+# Common utilities
+RUN mkdir -p gawk-src                                   \
+    && tar -xzf gawk*.tar.gz -C gawk-src/               \
+    && cd gawk-src/gawk*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p tar-src                                    \
+    && export FORCE_UNSAFE_CONFIGURE=1                  \
+    && tar -xzf tar*.tar.gz -C tar-src/                 \
+    && cd tar-src/tar*                                  \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Reinstall autoconf and automake
+
+RUN mkdir -p autoconf-src                               \
+    && tar -xzf autoconf*.tar.gz -C autoconf-src/       \
+    && cd autoconf-src/autoconf*                        \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p texinfo-src                                \
+    && tar -xf texinfo-*.tar.gz -C texinfo-src/         \
+    && cd texinfo-src/texinfo*                          \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p groff-src                                  \
+    && tar -xf groff-*.tar.gz -C groff-src/             \
+    && cd groff-src/groff*                              \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p make-src                                   \
+    && tar -xf make-*.tar.gz -C make-src/               \
+    && cd make-src/make*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+
+RUN mkdir -p ldap-src                                   \
+    && tar -xf openldap*.tgz -C ldap-src/               \
+    && cd ldap-src/open*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Cmake
+RUN mkdir -p cmake-src                                  \
+    && tar -xzf cmake*.tar.gz -C cmake-src/             \
+    && cd cmake-src/cmake*                              \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+# Here be liblzo and other friends
+
+RUN mkdir -p libidn-src                                 \
+    && tar -xzf libidn*.tar.gz -C libidn-src/           \
+    && cd libidn-src/libidn*                            \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p zlib-src                                   \
+    && tar -xzf zlib*.tar.gz -C zlib-src/               \
+    && cd zlib-src/zlib*                                \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+
+# And then perl
+
+RUN mkdir -p perl-src                                   \
+    && tar -xzf perl*.tar.gz -C perl-src/               \
+    && cd perl-src/perl*                                \
+    && sh Configure -de                                 \
+    && make -j4                                         \
+    && make install
+
+# Next is OpenSSL as it requires perl to be built
+
+RUN mkdir -p openssl-src                                \
+    && tar -xzf openssl*.tar.gz -C openssl-src          \
+    && cd openssl-src/openssl*                          \
+    && ./config                                         \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p python-src                                 \
+    && tar -xzf Python*.tgz -C python-src/              \
+    && cd python-src/Python*                            \
+    && ./configure                                      \
+    && make -j4                                         \
+    && make install
+
+RUN mkdir -p meson-src                                  \
+    && tar -xzf meson*.tar.gz -C meson-src/             \
+    && cd meson-src/meson*                              \
+    && python3 -m pip install meson
+
+RUN mkdir -p curl-src                                   \
+    && tar -xf curl*.tar.bz2 -C curl-src/               \
+    && cd curl-src/curl*                                \
+    && ./configure --with-openssl                       \
+    && make -j4                                         \
+    && make install
+
+# And some important perl tools
+
+RUN mkdir -p App-cpanminus                              \
+    && tar -xzf App-cpanminus*.tar.gz -C App-cpanminus  \
+    && cd App-cpanminus/App-cpanminus*                  \
+    && perl Makefile.PL                                 \
+    && make                                             \
+    && make install
+
+# We also now have a full ssl and gcc stack so lets get libwww-perl working
+
+RUN mkdir -p libwww-perl-src                            \
+    && tar -xzf libwww-perl*.tar.gz -C libwww-perl-src  \
+    && cd libwww-perl-src/lib*                          \
+    && perl Makefile.PL                                 \
+    && make                                             \
+    && make install

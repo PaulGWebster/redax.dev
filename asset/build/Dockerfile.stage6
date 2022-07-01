@@ -1,0 +1,35 @@
+FROM perlbase:stage5 AS stage6
+
+# Bunch of testing stuff that takes forever to compile
+RUN cpanm Test Test2 Test::SharedFork Test::SharedObject Test::Deep Test::TCP
+
+# Primary network backer modules
+RUN cpanm Net::SSLeay
+RUN cpanm Net::FTP
+RUN cpanm Net::HTTP
+RUN cpanm Net::SMTP
+RUN cpanm Net::SC
+RUN cpanm Net::DNS
+
+# URL / HTTP handling
+RUN cpanm Mozilla::CA
+RUN cpanm IO::Socket::SSL
+RUN cpanm URI LWP
+
+# Common database drivers
+RUN cpanm DBI
+RUN cpanm DBD::LDAP 
+RUN cpanm DBD::Pg
+RUN cpanm DBD::SQLite
+RUN cpanm DBD::CSV
+
+# Even more database drivers
+RUN cpanm DBD::PgPP
+
+# Unfuck maria
+RUN ln -s /usr/local/mysql/bin/mariadb-config /usr/local/bin/mariadb_config
+RUN cpanm DBD::MariaDB
+
+# The broken ones
+RUN cpanm --installdeps Redis
+RUN cpanm -n Redis
