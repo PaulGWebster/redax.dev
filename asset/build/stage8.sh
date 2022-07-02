@@ -1,7 +1,7 @@
 #!/bin/bash
 
-docker build -f Dockerfile.stage8 -t paulgwebster/perlbase:release .        \
-&& docker tag paulgwebster/perlbase:release perlbase:release                \
-&& docker push paulgwebster/perlbase:release || echo "Could not upload image"
+docker build -f Dockerfile.stage8 -t paulgwebster/perlbase:stage8 .         \
+&& docker tag paulgwebster/perlbase:stage8 perlbase:stage8                  \
+&& docker push paulgwebster/perlbase:stage8 || echo "Could not upload image"
 
-echo "Final image created"
+echo "Pre user level instance created"

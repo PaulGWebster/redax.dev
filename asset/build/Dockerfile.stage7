@@ -20,3 +20,6 @@ RUN cpanm JSON JSON::MaybeXS Mojo::JSON::MaybeXS
 RUN cpanm Digest::MD2 Digest::MD4 Digest::MD5
 RUN cpanm MIME::Base64 Digest::SHA Digest::CRC 
 RUN cpanm Crypt::Cipher::AES Crypt::OpenSSL::AES
+
+# LibLocal for the final image
+RUN cpanm local::lib

@@ -15,6 +15,3 @@ RUN rm -Rf                                              \
     /usr/share/man/man1/dpkg.1.gz                       \
     /asset
 
-FROM scratch AS stage8
-
-COPY --from=stage7-clean / /
