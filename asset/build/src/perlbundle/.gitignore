@@ -1,0 +1,4 @@
+/local
+/Author-Daemon-DockerMetaBundle-*/
+*.tar.gz
+.build/

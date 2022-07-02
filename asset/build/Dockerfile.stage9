@@ -1,0 +1,10 @@
+FROM perlbase:stage8 AS stage9
+
+RUN useradd -mr perl
+
+# Populate our lib::local init
+USER perl
+RUN perl -MCPAN -Mlocal::lib -e 'CPAN::install(LWP)'
+RUN echo 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"' >>~/.bashrc
+
+WORKDIR /home/perl
