@@ -200,3 +200,4 @@ requires 'Test::LeakTrace', '0.17';
 requires 'Test::Lib', '0.003';
 requires 'Test::Time', '0.092';
 requires 'Test::CleanNamespaces', '0.13';
+requires 'Samba::Smbstatus', '>0.00';
