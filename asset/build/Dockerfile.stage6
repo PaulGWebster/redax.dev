@@ -11,8 +11,6 @@ RUN rm -Rf                                              \
 
 RUN useradd -mr perl
 
-RUN echo "perl" > /etc/hostname
-
 # Populate our lib::local init
 USER perl
 RUN perl -MCPAN -Mlocal::lib -e 'CPAN::install(LWP)'

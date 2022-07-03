@@ -1,5 +1,9 @@
 FROM perlbase:stage0 AS stage1
 
+USER root
+
+RUN echo "perlsys" > /etc/hostname
+
 COPY src /asset
 
 WORKDIR /asset
@@ -15,12 +19,3 @@ RUN apt remove              \
     autotools-dev           \
     -y                      \
     --allow-remove-essential
-
-RUN rm -Rf                                              \
-    /var/cache/apt                                      \
-    /usr/bin/dpkg                                       \
-    /usr/lib/dpkg                                       \
-    /etc/dpkg                                           \
-    /usr/share/dpkg                                     \
-    /usr/share/man/man1/dpkg.1.gz
-

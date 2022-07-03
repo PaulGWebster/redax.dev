@@ -6,14 +6,14 @@ RUN mkdir -p bison-src                                  \
     && cd bison-src/bison*                              \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p tcl-src                                    \
     && tar -xzf tcl*.tar.gz -C tcl-src/                 \
     && cd tcl-src/tcl*/unix                             \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # Singularize our shells to bash
 RUN mkdir -p bash-src                                   \
@@ -21,7 +21,7 @@ RUN mkdir -p bash-src                                   \
     && cd bash-src/bash*                                \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # Should really deploy a script to check what is in /etc/shells and go nuke them
 # that way
@@ -37,7 +37,7 @@ RUN mkdir -p gawk-src                                   \
     && cd gawk-src/gawk*                                \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p tar-src                                    \
     && export FORCE_UNSAFE_CONFIGURE=1                  \
@@ -45,7 +45,7 @@ RUN mkdir -p tar-src                                    \
     && cd tar-src/tar*                                  \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # Reinstall autoconf and automake
 
@@ -54,28 +54,28 @@ RUN mkdir -p autoconf-src                               \
     && cd autoconf-src/autoconf*                        \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p texinfo-src                                \
     && tar -xf texinfo-*.tar.gz -C texinfo-src/         \
     && cd texinfo-src/texinfo*                          \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p groff-src                                  \
     && tar -xf groff-*.tar.gz -C groff-src/             \
     && cd groff-src/groff*                              \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p make-src                                   \
     && tar -xf make-*.tar.gz -C make-src/               \
     && cd make-src/make*                                \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 
 RUN mkdir -p ldap-src                                   \
@@ -83,7 +83,7 @@ RUN mkdir -p ldap-src                                   \
     && cd ldap-src/open*                                \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # Cmake
 RUN mkdir -p cmake-src                                  \
@@ -91,7 +91,7 @@ RUN mkdir -p cmake-src                                  \
     && cd cmake-src/cmake*                              \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # Here be liblzo and other friends
 
@@ -100,14 +100,14 @@ RUN mkdir -p libidn-src                                 \
     && cd libidn-src/libidn*                            \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p zlib-src                                   \
     && tar -xzf zlib*.tar.gz -C zlib-src/               \
     && cd zlib-src/zlib*                                \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 
 # And then perl
@@ -117,7 +117,7 @@ RUN mkdir -p perl-src                                   \
     && cd perl-src/perl*                                \
     && sh Configure -de                                 \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # Next is OpenSSL as it requires perl to be built
 
@@ -126,14 +126,14 @@ RUN mkdir -p openssl-src                                \
     && cd openssl-src/openssl*                          \
     && ./config                                         \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p python-src                                 \
     && tar -xzf Python*.tgz -C python-src/              \
     && cd python-src/Python*                            \
     && ./configure                                      \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 RUN mkdir -p meson-src                                  \
     && tar -xzf meson*.tar.gz -C meson-src/             \
@@ -145,7 +145,7 @@ RUN mkdir -p curl-src                                   \
     && cd curl-src/curl*                                \
     && ./configure --with-openssl                       \
     && make -j4                                         \
-    && make install
+    && make install clean
 
 # And some important perl tools
 
@@ -154,7 +154,7 @@ RUN mkdir -p App-cpanminus                              \
     && cd App-cpanminus/App-cpanminus*                  \
     && perl Makefile.PL                                 \
     && make                                             \
-    && make install
+    && make install clean
 
 # We also now have a full ssl and gcc stack so lets get libwww-perl working
 
@@ -163,4 +163,4 @@ RUN mkdir -p libwww-perl-src                            \
     && cd libwww-perl-src/lib*                          \
     && perl Makefile.PL                                 \
     && make                                             \
-    && make install
+    && make install clean
