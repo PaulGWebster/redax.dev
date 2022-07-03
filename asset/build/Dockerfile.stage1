@@ -24,5 +24,3 @@ RUN rm -Rf                                              \
     /usr/share/dpkg                                     \
     /usr/share/man/man1/dpkg.1.gz
 
-# Remove any folders we created in asset including the base folder
-RUN find /asset -type d -exec rm -rf \;

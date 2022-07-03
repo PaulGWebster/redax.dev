@@ -1,7 +1,5 @@
 FROM perlbase:stage1 AS stage2
 
-RUN find /asset -type d -exec rm -rf \;
-
 # Start with the major backers
 RUN mkdir -p bison-src                                  \
     && tar -xzf bison*.tar.gz -C bison-src/             \

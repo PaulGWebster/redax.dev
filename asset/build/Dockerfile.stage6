@@ -1,42 +1,25 @@
 FROM perlbase:stage5 AS stage6
 
-# # Bunch of testing stuff that takes forever to compile
-# RUN cpanm Test Test2 Test::SharedFork Test::SharedObject Test::Deep Test::TCP
+RUN rm -Rf                                              \
+    /var/cache/apt                                      \
+    /usr/bin/dpkg                                       \
+    /usr/lib/dpkg                                       \
+    /etc/dpkg                                           \
+    /usr/share/dpkg                                     \
+    /usr/share/man/man1/dpkg.1.gz                       \
+    /asset
 
-# # Primary network backer modules
-# RUN cpanm Net::SSLeay
-# RUN cpanm Net::FTP
-# RUN cpanm Net::HTTP
-# RUN cpanm Net::SMTP
-# RUN cpanm Net::SC
-# RUN cpanm Net::DNS
+RUN useradd -mr perl
 
-# # URL / HTTP handling
-# RUN cpanm Mozilla::CA
-# RUN cpanm IO::Socket::SSL
-# RUN cpanm URI LWP
+RUN echo "perl" > /etc/hostname
 
-# # Common database drivers
-# RUN cpanm DBI
-# RUN cpanm DBD::LDAP
-# RUN cpanm DBD::Pg
-# RUN cpanm DBD::SQLite
-# RUN cpanm DBD::CSV
+# Populate our lib::local init
+USER perl
+RUN perl -MCPAN -Mlocal::lib -e 'CPAN::install(LWP)'
+RUN echo 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"' >>~/.bashrc
 
-# # Even more database drivers
-# RUN cpanm DBD::PgPP
+FROM scratch AS stage6-flatten
 
-# Unfuck maria
-RUN ln -s /usr/local/mysql/bin/mariadb-config /usr/local/bin/mariadb_config
-RUN echo ":)"
-#RUN wget https://github.com/PaulGWebster/p5-Author-Daemon-DockerMetaBundle/archive/refs/heads/master.zip && unzip master
-COPY perlbundle p5-Author-Daemon-DockerMetaBundle
-RUN cd p5-Auth* && cpanm --installdeps --notest --from "$(pwd)/vendor/cache" .
-
-# Unfuck maria
-#RUN ln -s /usr/local/mysql/bin/mariadb-config /usr/local/bin/mariadb_config
-#RUN cpanm DBD::MariaDB
-
-# The broken ones
-# RUN cpanm --installdeps Redis
-# RUN cpanm -n Redis
+COPY --from=stage6 / /
+WORKDIR /home/perl
+USER perl
