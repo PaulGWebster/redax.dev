@@ -1,7 +1,70 @@
 FROM perlbase:stage4 AS stage5
 
+
+
+# Why is this here again? I think its an sqlite requirement
+COPY src/lemon* /asset
+RUN mkdir -p lemon-src                                  \
+    && tar -xzf lemon*.tar.gz -C lemon-src/             \
+    && cd lemon-src/lemon*                              \
+    && mkdir -p build                                   \
+    && cd build                                         \
+    && cmake ..                                         \
+    && make                                             \
+    && make install clean
+
+# Postgresql
+COPY src/postgres* /asset
+RUN ./build-standard.sh postgres
+
+# MariaDB
+COPY src/mariadb* /asset
+RUN mkdir -p mariadb-src                                \
+    && tar -xzf mariadb*.tar.gz -C mariadb-src/         \
+    && cd mariadb-src/mariadb*                          \
+    && cmake .                                          \
+    && make install clean
+
 # Unfuck maria
 RUN ln -s /usr/local/mysql/bin/mariadb-config /usr/local/bin/mariadb_config
 
-RUN cd /asset/perlbundle                                            \
-    && cpanm --installdeps --notest --from "$(pwd)/vendor/cache" .
+# SQLite
+COPY src/sqlite* /asset
+RUN ./build-standard.sh sqlite
+
+# Redis
+COPY src/redis* /asset
+RUN mkdir -p redis-src                                  \
+    && tar -xzf redis*.tar.gz -C redis-src/             \
+    && cd redis-src/redis*                              \
+    && make -j4 BUILD_TLS=yes                           \
+    && make install clean
+
+# Install all our perl modules
+RUN echo "hello";
+COPY src/perlbundle /asset/perlbundle
+
+COPY src/pkg-config* /asset
+RUN CARGS="--with-internal-glib" ./build-standard.sh pkg-config
+
+COPY src/zlib* /asset
+RUN ./build-standard.sh zlib
+
+COPY src/LMDB* /asset
+RUN tar -xf LMDB*                       \
+    && rm LMDB*                         \
+    && cd lmdb*                         \
+    && cd libraries/liblmdb             \
+    && make                             \
+    && sed -i 's| liblmdb.a||' Makefile \
+    && make prefix=/usr install
+
+COPY src/flex* /asset
+RUN ./build-standard.sh flex
+
+COPY src/samba* /asset
+RUN CARGS="                 \
+        --enable-fhs        \
+        --without-ad-dc     \
+        --without-json      \
+        " ./build-standard.sh samba

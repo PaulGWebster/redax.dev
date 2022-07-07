@@ -4,11 +4,15 @@
 # and then re-run stage2 to recompile ontop of the existing image
 # to ensure lib-linkage
 
-docker export perlbase:stage1 > stage1.tar \
-&& docker rmi perlbase:stage1 \
-&& docker tag perlbase:stage2 perlbase:stage1 \
-&& docker build -f Dockerfile.stage2 -t paulgwebster/perlbase:stage3 .
+echo "Copying stage2 dockerfile to stage3"
+cp -v Dockerfile.stage2 Dockerfile.stage3
+echo "Modifying copy"
+sed -i 's/FROM perlbase:stage1 AS stage2/FROM perlbase:stage2 AS stage3/' Dockerfile.stage3
+#cat Dockerfile.tmp | perl -ne 'my $line = $_; $line =~ s/stage\d-step(\d)/stage3-step$1/g; print $line' > Dockerfile.stage3
 
-docker push paulgwebster/perlbase:stage3 || echo "Could not upload image"
+docker build --no-cache -f Dockerfile.stage3 -t perlbase:stage3 . \
+&& echo "New OS Lib image created, saving state" \
+&& docker save -o stage3.dockerimg perlbase:stage3 \
+&& echo "Written stage3.dockerimg" \
+&& docker run perlbase:stage1 find / -name "*" > stage3.filelist
 
-echo "Relinked OS lib image created"

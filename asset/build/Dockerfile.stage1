@@ -4,18 +4,21 @@ USER root
 
 RUN echo "perlsys" > /etc/hostname
 
-COPY src /asset
+COPY bin /root
 
 WORKDIR /asset
 
+# RUN perl /root/clear-apt.pl
+
 RUN apt remove              \ 
-    perl                    \
-    python3                 \
-    debian-archive-keyring  \
-    apt                     \
     x11-common              \
-    media-types             \
-    mariadb-common          \
-    autotools-dev           \
-    -y                      \
-    --allow-remove-essential
+    python3                 \
+    subversion              \
+    hicolor-icon-theme      \
+    libx11-dev              \
+    -y
+
+RUN apt autoremove -y
+
+# Leave apt as it is for now, we will remove it later when we 
+# have built a some libs

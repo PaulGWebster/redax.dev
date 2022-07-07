@@ -1,6 +1,90 @@
-# This is a stub file due to stage2 being reran on its self to ensure ssl
-# lib linking, see stage3.sh for what is going on
+FROM perlbase:stage2 AS stage2
 
 FROM perlbase:stage2 AS stage3
 
-RUN echo "You should never see this."
+COPY --from=stage2 / /
+
+# Copy our helper scripts across
+COPY src/install /asset
+
+COPY src/App-cpanm* /asset
+RUN ./build-special.sh App-cpan cpanm
+
+COPY src/libwww* /asset
+RUN ./build-special.sh libwww libwww
+
+
+COPY src/tcl* /asset
+RUN ./build-special.sh tcl tcl
+
+# Singularize our shells to bash
+
+
+
+COPY src/groff* /asset
+RUN ./build-standard.sh groff
+
+COPY src/openldap* /asset
+RUN ./build-standard.sh openldap
+
+COPY src/cmake* /asset
+RUN ./build-standard.sh cmake
+
+
+
+COPY src/openssl* /asset
+RUN ./build-special.sh openssl openssl
+
+
+
+COPY src/meson* /asset
+RUN ./build-special.sh meson meson
+
+COPY src/curl* /asset
+RUN CARGS="--with-openssl" ./build-standard.sh curl
+
+
+COPY src/rsync* /asset
+RUN CARGS="--disable-xxhash --without-included-zlib" ./build-standard.sh rsync
+
+COPY src/App-cpanm* /asset
+RUN ./build-special.sh App-cpan cpanm
+
+COPY src/libwww* /asset
+RUN ./build-special.sh libwww libwww
+
+# Zlib
+COPY src/zlib* /asset
+RUN ./build-standard.sh zlib
+
+# lzo
+COPY src/lzo* /asset
+RUN ./build-standard.sh lzo
+
+# lz4
+COPY src/lz4* /asset
+RUN ./build-special.sh lz4 lz4
+
+# Zstd
+COPY src/zstd* /asset
+RUN ./build-special.sh zstd zstd
+
+# libidn1
+COPY src/libidn-1* /asset
+RUN ./build-standard.sh libidn-1
+
+# libidn2
+COPY src/libidn2* /asset
+RUN ./build-special.sh libidn2 libidn2
+
+# Autoconf
+COPY src/autoconf* /asset
+RUN ./build-special.sh autoconf autoconf
+
+# Automake
+COPY src/automake* /asset
+RUN ./build-special.sh automake automake
+
+# Libtool
+COPY src/libtool* /asset
+RUN ./build-special.sh libtool libtool

@@ -1,166 +1,114 @@
 FROM perlbase:stage1 AS stage2
 
-# Start with the major backers
-RUN mkdir -p bison-src                                  \
-    && tar -xzf bison*.tar.gz -C bison-src/             \
-    && cd bison-src/bison*                              \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Copy our helper scripts across
+COPY src/install /asset
 
-RUN mkdir -p tcl-src                                    \
-    && tar -xzf tcl*.tar.gz -C tcl-src/                 \
-    && cd tcl-src/tcl*/unix                             \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Sart with known missing, then follow LFS order
+# Supporting languages - Replace system base in some cases
 
-# Singularize our shells to bash
-RUN mkdir -p bash-src                                   \
-    && tar -xzf bash*.tar.gz -C bash-src/               \
-    && cd bash-src/bash*                                \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Bison
+COPY src/bison-* /asset
+RUN ./build-standard.sh bison
 
-# Should really deploy a script to check what is in /etc/shells and go nuke them
-# that way
+# Python
+COPY src/Python* /asset
+RUN ./build-standard.sh Python
 
-RUN unlink /bin/sh && ln -s /bin/bash /bin/sh
-RUN rm /bin/dash || echo "Dash not found"
-RUN echo "/bin/sh" > /etc/shells                        \
+# M4
+COPY src/m4-* /asset
+RUN ./build-standard.sh m4
+
+# Ncurses
+COPY src/ncurses-* /asset
+RUN ./build-special.sh ncurses ncurses
+
+# Bash
+COPY src/bash* /asset
+RUN PREFIX="/"                                      \
+    CARGS="                                         \
+        --enable-process-substitution               \
+        --enable-function-import                    \
+        --enable-net-redirections                   \
+        --enable-directory-stack                    \
+        --enable-command-timing                     \
+        --enable-alias                              \
+        --without-bash-malloc                       \
+    " ./build-standard.sh bash                      \
+    && ln -sf /bin/bash /bin/sh                     \
+    && echo "/bin/sh" > /etc/shells                 \
     && echo "/bin/bash" >> /etc/shells
 
-# Common utilities
-RUN mkdir -p gawk-src                                   \
-    && tar -xzf gawk*.tar.gz -C gawk-src/               \
-    && cd gawk-src/gawk*                                \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Coreutils
+COPY src/coreutils-* /asset
+RUN PREFIX="/"                                      \
+    CARGS="                                         \
+        --enable-install-program=hostname           \
+        --enable-no-install-program=uname           \
+    "                                               \
+    FORCE_UNSAFE_CONFIGURE=1 ./build-standard.sh coreutils
 
-RUN mkdir -p tar-src                                    \
-    && export FORCE_UNSAFE_CONFIGURE=1                  \
-    && tar -xzf tar*.tar.gz -C tar-src/                 \
-    && cd tar-src/tar*                                  \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Diffutils
+COPY src/diffutils-* /asset
+RUN ./build-standard.sh diffutils
 
-# Reinstall autoconf and automake
+# Gave up on 'file'
 
-RUN mkdir -p autoconf-src                               \
-    && tar -xzf autoconf*.tar.gz -C autoconf-src/       \
-    && cd autoconf-src/autoconf*                        \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Find etc
+COPY src/findutils-* /asset
+RUN CARGS="--localstatedir=/var/lib/locate" ./build-standard.sh findutils
 
-RUN mkdir -p texinfo-src                                \
-    && tar -xf texinfo-*.tar.gz -C texinfo-src/         \
-    && cd texinfo-src/texinfo*                          \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Gawk
+COPY src/gawk* /asset
+RUN ./build-standard.sh gawk
 
-RUN mkdir -p groff-src                                  \
-    && tar -xf groff-*.tar.gz -C groff-src/             \
-    && cd groff-src/groff*                              \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Grep
+COPY src/grep-* /asset
+RUN PREFIX="/" ./build-standard.sh grep
 
-RUN mkdir -p make-src                                   \
-    && tar -xf make-*.tar.gz -C make-src/               \
-    && cd make-src/make*                                \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Gzip
+COPY src/gzip-* /asset
+RUN ./build-standard.sh gzip
 
+# Install make
+COPY src/make* /asset
+RUN ./build-standard.sh make
 
-RUN mkdir -p ldap-src                                   \
-    && tar -xf openldap*.tgz -C ldap-src/               \
-    && cd ldap-src/open*                                \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Install patch
+COPY src/patch* /asset
+RUN ./build-standard.sh patch
 
-# Cmake
-RUN mkdir -p cmake-src                                  \
-    && tar -xzf cmake*.tar.gz -C cmake-src/             \
-    && cd cmake-src/cmake*                              \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Install sed
+COPY src/sed* /asset
+RUN ./build-standard.sh sed
 
-# Here be liblzo and other friends
+# Tar
+COPY src/tar* /asset
+RUN PREFIX="/" ./build-special.sh tar tar
 
-RUN mkdir -p libidn-src                                 \
-    && tar -xzf libidn*.tar.gz -C libidn-src/           \
-    && cd libidn-src/libidn*                            \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# XZ
+COPY src/xz-* /asset
+RUN CARGS="--disable-static" ./build-standard.sh xz
 
-RUN mkdir -p zlib-src                                   \
-    && tar -xzf zlib*.tar.gz -C zlib-src/               \
-    && cd zlib-src/zlib*                                \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
+# Gettext
+COPY src/gettext* /asset
+RUN ./build-standard.sh gettext
 
+# Texinfo
+COPY src/texinfo* /asset
+RUN ./build-standard.sh texinfo
 
-# And then perl
+# Util-linux - need pkg-config
+# COPY src/util-linux* /asset
+# RUN tar -xf util-linux* && rm util-linux*.tar.* && cd util-linux* \
+#     && ./autogen.sh                         \
+#     && ./configure                          \
+#         --prefix=/usr                       \
+#         --libdir=/usr/lib                   \
+#         --docdir=/usr/share/doc/util-linux  \
+#         runstatedir=/run                    \
+#     && make -j4                             \
+#     && make strip-install                   \
+#     && cd ..                                \
+#     && rm -Rf util-linux*
 
-RUN mkdir -p perl-src                                   \
-    && tar -xzf perl*.tar.gz -C perl-src/               \
-    && cd perl-src/perl*                                \
-    && sh Configure -de                                 \
-    && make -j4                                         \
-    && make install clean
-
-# Next is OpenSSL as it requires perl to be built
-
-RUN mkdir -p openssl-src                                \
-    && tar -xzf openssl*.tar.gz -C openssl-src          \
-    && cd openssl-src/openssl*                          \
-    && ./config                                         \
-    && make -j4                                         \
-    && make install clean
-
-RUN mkdir -p python-src                                 \
-    && tar -xzf Python*.tgz -C python-src/              \
-    && cd python-src/Python*                            \
-    && ./configure                                      \
-    && make -j4                                         \
-    && make install clean
-
-RUN mkdir -p meson-src                                  \
-    && tar -xzf meson*.tar.gz -C meson-src/             \
-    && cd meson-src/meson*                              \
-    && python3 -m pip install meson
-
-RUN mkdir -p curl-src                                   \
-    && tar -xf curl*.tar.bz2 -C curl-src/               \
-    && cd curl-src/curl*                                \
-    && ./configure --with-openssl                       \
-    && make -j4                                         \
-    && make install clean
-
-# And some important perl tools
-
-RUN mkdir -p App-cpanminus                              \
-    && tar -xzf App-cpanminus*.tar.gz -C App-cpanminus  \
-    && cd App-cpanminus/App-cpanminus*                  \
-    && perl Makefile.PL                                 \
-    && make                                             \
-    && make install clean
-
-# We also now have a full ssl and gcc stack so lets get libwww-perl working
-
-RUN mkdir -p libwww-perl-src                            \
-    && tar -xzf libwww-perl*.tar.gz -C libwww-perl-src  \
-    && cd libwww-perl-src/lib*                          \
-    && perl Makefile.PL                                 \
-    && make                                             \
-    && make install clean
+RUN rm -rf /usr/share/{info,man,doc}/*

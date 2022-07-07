@@ -1,7 +1,7 @@
 #!/bin/bash
 
-docker build -f Dockerfile.stage1 -t paulgwebster/perlbase:stage1 .         \
-&& docker tag paulgwebster/perlbase:stage1 perlbase:stage1                  \
-&& docker push paulgwebster/perlbase:stage1 || echo "Could not upload image"
-
-echo "New base OS image created"
+docker build -f Dockerfile.stage1 -t perlbase:stage1 . \
+&& echo "New base OS image created, saving state." \
+&& docker save -o stage1.dockerimg perlbase:stage1 \
+&& echo "Written stage1.dockerimg"  \
+&& docker run perlbase:stage1 find / -name "*" > stage1.filelist
